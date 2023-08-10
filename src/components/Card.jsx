@@ -8,6 +8,7 @@ const Card = ({ ...items }) => {
     return (
         <>
             <div className="h-[381px] w-[252px] bg-white rounded-md hover:drop-shadow-md">
+                {/* Card image sliding section */}
                 <CardImageSLider images={items.images} />
 
                 {/*title */}

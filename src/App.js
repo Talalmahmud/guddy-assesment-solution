@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import buttonList from "./propertyType.json";
 import Card from "./components/Card";
 import { HiArrowLongLeft, HiArrowLongRight } from "react-icons/hi2";
@@ -6,38 +6,68 @@ import { HiArrowLongLeft, HiArrowLongRight } from "react-icons/hi2";
 const App = () => {
     const [content, setContent] = useState([]);
     const [match, setMatch] = useState("");
+    const [scrollLeftVisible, setScrollLeftVisible] = useState(false);
+    const [scrollRightVisible, setScrollRightVisible] = useState(true); // Initially assuming you can scroll right
     const scrollRef = useRef(null);
+    // const [hideFilter, setHideFilter] = useState(false);
+
+    // const hideFilterButton = () => {
+    //     setHideFilter(!hideFilter);
+    // };
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const container = scrollRef.current;
+            setScrollLeftVisible(container.scrollLeft > 0);
+            setScrollRightVisible(
+                container.scrollLeft <
+                    container.scrollWidth - container.clientWidth
+            );
+        }
+    };
 
     const scrollControllLeft = () => {
         if (scrollRef.current) {
             scrollRef.current.scrollLeft -= 100;
+            handleScroll(); // Update visibility after scrolling
         }
     };
+
     const scrollControllRight = () => {
         if (scrollRef.current) {
             scrollRef.current.scrollLeft += 100;
+            handleScroll(); // Update visibility after scrolling
         }
     };
-    const contentChangeOnClick = useCallback(
-        async (value) => {
-            if (match === value) {
-                const res = await fetch(
-                    `https://dev.ghuddy.link/api/v1/open/hotels`
-                );
-                const resData = await res.json();
-                setMatch("");
-                setContent(resData.esHotelCardList);
-            } else {
-                const res = await fetch(
-                    `https://dev.ghuddy.link/api/v1/open/hotels?propertyType=${value}`
-                );
-                const resData = await res.json();
-                setMatch(value);
-                setContent(resData.esHotelCardList);
-            }
-        },
-        [match]
-    );
+
+    // const scrollControllLeft = () => {
+    //     console.log(scrollRef.current);
+    //     if (scrollRef.current) {
+    //         scrollRef.current.scrollLeft -= 100;
+    //     }
+    // };
+    // const scrollControllRight = () => {
+    //     if (scrollRef.current) {
+    //         scrollRef.current.scrollLeft += 100;
+    //     }
+    // };
+    const contentChangeOnClick = async (value) => {
+        if (match === value) {
+            const res = await fetch(
+                `https://dev.ghuddy.link/api/v1/open/hotels`
+            );
+            const resData = await res.json();
+            setMatch("");
+            setContent(resData.esHotelCardList);
+        } else {
+            const res = await fetch(
+                `https://dev.ghuddy.link/api/v1/open/hotels?propertyType=${value}`
+            );
+            const resData = await res.json();
+            setMatch(value);
+            setContent(resData.esHotelCardList);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -53,6 +83,10 @@ const App = () => {
     return (
         <div className="p-4 w-full text-textColor font-poppins ">
             <h2 className=" text-[22px] font-bold">Hotels</h2>
+            {/* <div>
+                <button onClick={hideFilterButton}>Hide Filter</button>
+            </div> */}
+            {/* header button */}
             <div className="flex gap-x-2 w-full overflow-x-auto scroll-smooth mt-2">
                 {buttonList.map((item, index) => (
                     <button
@@ -91,14 +125,26 @@ const App = () => {
                 <Card2 />
                 <Card2 />
             </div> */}{" "}
-            <div className="flex justify-between items-center py-2">
-                <button className="mr-10" onClick={scrollControllLeft}>
+            {/* slider button */}
+            <div className=" relative h-20">
+                <button
+                    onClick={scrollControllLeft}
+                    className={` top-[50%] left-2 absolute ${
+                        scrollLeftVisible ? "visible" : "hidden"
+                    }`}
+                >
                     <HiArrowLongLeft size={20} />
                 </button>
-                <button onClick={scrollControllRight}>
+                <button
+                    onClick={scrollControllRight}
+                    className={` top-[50%] right-2 absolute ${
+                        scrollRightVisible ? "visible" : "hidden"
+                    }`}
+                >
                     <HiArrowLongRight size={20} />
                 </button>
             </div>
+            {/* Content card */}
             <div
                 ref={scrollRef}
                 className="flex gap-x-4 w-full sm:w-full whitespace-nowrap overflow-x-auto scroll-smooth mt-2 "
